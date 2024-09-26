@@ -3,7 +3,7 @@ const yts = require("yt-search");
 const fs = require("fs");
 const axios = require("axios");
 const giftedapikey = 'gifteddevskk';
-const BaseUrl = 'https://api-gifted-tech.onrender.com';
+const BaseUrl = 'https://api-gifted-test-460bb726857c.herokuapp.com';
 
 const downloadFile = async (url, filePath, mimeType, originMessage, zk, commandeOptions) => {
   try {
@@ -67,7 +67,7 @@ Use prefix {/}, e.g., {/search dada}
 
       zk.sendMessage(origineMessage, messageDetails, { quoted: commandeOptions.ms });
 
-      await downloadFile(`${BaseUrl}/api/download/ytmp3?url=${encodeURIComponent(video.url)}&apikey=${giftedapikey}`, filePath, `audio/mp4`, origineMessage, zk, commandeOptions);
+      await downloadFile(`${BaseUrl}/api/download/ytmp3?url=${encodeURIComponent(videoUrl)}&apikey=${giftedapikey}`, filePath, `audio/mp4`, origineMessage, zk, commandeOptions);
       
       zk.sendMessage(origineMessage, {
         [fileType]: { url: filePath },
