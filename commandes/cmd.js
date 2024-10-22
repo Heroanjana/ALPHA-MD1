@@ -1,6 +1,7 @@
 const { zokou } = require("../framework/zokou");
 const yts = require('yt-search');
-const axios = require('axios');
+const axios = require("axios");
+const BaseUrl = 'https://widipe.com';
 
 zokou({
   nomCom: "sing",
@@ -15,31 +16,51 @@ zokou({
   }
 
   try {
-    const songName = arg.join(" ");
-    
-    // Perform YouTube search
-    const search = await yts(songName);
+    const topo = arg.join(" ");
+    const search = await yts(topo);
     const videos = search.videos;
 
     if (videos && videos.length > 0) {
-      const videoUrl = videos[0].url;
+      const video = videos[0]; // Use the first video object
+      const videoUrl = video.url;
 
-      // Call the API endpoint to fetch audio download URL
-      const downloadInfoResponse = await axios.get(`https://ab.cococococ.com/ajax/download.php?copyright=0&format=mp3&url=${encodeURIComponent(videoUrl)}&api=dfcb6d76f2f6a9894gjkege8a4ab232222`);
-      
-      if (downloadInfoResponse.data.status === 200 && downloadInfoResponse.data.success) {
-        const audioDlUrl = downloadInfoResponse.data.result.download_url;
-        const title = downloadInfoResponse.data.info.title;
-        const image = downloadInfoResponse.data.info.image;
+      // Call the API endpoint to fetch the audio download URL
+      const apiResponse = await axios.get(`${BaseUrl}/download/ytdl?url=${encodeURIComponent(videoUrl)}`);
+      const apiResult = apiResponse.data;
+
+      if (apiResult.status === 200 && apiResult.success) {
+        const audioDlUrl = apiResult.result.download_url;
+
+        // Prepare the message with song details
+        const infoMess = {
+          image: { url: video.thumbnail },
+          caption: `*ALPHA-MD SONG PLAYER*\n
+╭───────────────◆
+│✞ *Title:* ${video.title}
+│✞ *Quality:* ${video.type}
+│✞ *Duration:* ${video.timestamp}
+│✞ *Viewers:* ${video.views}
+│✞ *Uploaded:* ${video.ago}
+│✞ *Artist:* ${video.author.name}
+╰────────────────◆
+⦿ *Direct YtLink:* ${video.url}
+╭────────────────◆
+You can also join here to get your song download in more tracks 🤗😋 
+https://t.me/keithmd 
+Use prefix {/} example {/search dada}
+╰────────────────◆
+╭────────────────◆
+│ *_Powered by keithkeizzah._*
+╰─────────────────◆`
+        };
 
         // Send song details
-        const infoMess = `*ALPHA-MD SONG PLAYER*\nTitle: ${title}`;
         await zk.sendMessage(dest, infoMess, { quoted: ms });
 
-        // Send the audio
+        // Send the audio as a document
         await zk.sendMessage(dest, {
-          audio: { url: audioDlUrl },
-          mimetype: 'audio/mp4'
+          document: { url: audioDlUrl },
+          mimetype: 'audio/mp3'
         }, { quoted: ms });
 
         repondre('*Alpha md has just downloaded your song*...');
@@ -51,6 +72,6 @@ zokou({
     }
   } catch (error) {
     console.error('Error from API:', error);
-    repondre('An error occurred while searching or downloading the audio.');
+    repondre('An error occurred while searching or downloading the audio.\n' + error);
   }
 });
